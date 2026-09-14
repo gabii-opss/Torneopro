@@ -1,0 +1,11 @@
+# Compilado
+target/
+*.class
+
+# IDEs
+.idea/
+*.iml
+
+# Sistema
+.DS_Store
+Thumbs.db
