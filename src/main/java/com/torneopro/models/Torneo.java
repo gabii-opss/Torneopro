@@ -1,5 +1,7 @@
 package com.torneopro.models;
 
+import com.torneopro.Exceptions.EquipoIncompletoException;
+import com.torneopro.Exceptions.TorneoYaIniciadoException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,10 +32,10 @@ public class Torneo {
 
     public void inscribirEquipo(Equipo equipo) {
         if (iniciado) {
-            throw new IllegalStateException("No se pueden inscribir equipos: el torneo ya inicio.");
+            throw new TorneoYaIniciadoException("No se pueden inscribir equipos: el torneo ya inicio.");
         }
         if (!equipo.estaCompleto()) {
-            throw new IllegalArgumentException(
+            throw new EquipoIncompletoException(
                 "El equipo '" + equipo.getNombre() + "' no esta completo, no puede inscribirse."
             );
         }

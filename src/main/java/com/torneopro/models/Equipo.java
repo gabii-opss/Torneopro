@@ -1,5 +1,6 @@
 package com.torneopro.models;
 
+import com.torneopro.Exceptions.EquipoCompletoException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,7 @@ public class Equipo {
 
     public void agregarJugador(Jugador jugador) {
         if (estaCompleto()) {
-            throw new IllegalStateException(
+            throw new EquipoCompletoException(
                 "El equipo '" + nombre + "' ya tiene el maximo de " + MAX_JUGADORES + " jugadores."
             );
         }
