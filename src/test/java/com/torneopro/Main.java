@@ -5,6 +5,8 @@ import com.torneopro.models.Equipo;
 import com.torneopro.models.Jugador;
 import com.torneopro.models.Partido;
 import com.torneopro.models.Torneo;
+import com.torneopro.Persistence.ConexionBD;
+import com.torneopro.Persistence.EquipoRepositorio;
 import com.torneopro.Services.GestorNotificaciones;
 import com.torneopro.Services.GestorTorneo;
 import com.torneopro.Services.NotificadorConsola;
@@ -15,6 +17,20 @@ import java.util.concurrent.CompletableFuture;
 
 public class Main {
     public static void main(String[] args) {
+
+        // --- Sesion 7: persistencia ---
+        ConexionBD.inicializarEsquema();
+
+        EquipoRepositorio equipoRepo = new EquipoRepositorio();
+        Equipo equipoPrueba = crearEquipoDemo("Equipo Persistido");
+        equipoRepo.guardar(equipoPrueba);
+
+        System.out.println("--- Equipos guardados en la base de datos ---");
+        equipoRepo.listarTodos().forEach(e ->
+            System.out.println(e + " -> jugadores: " + e.getJugadores())
+        );
+
+        // --- Sesion 4: flujo MVC interactivo ---
         Torneo torneo = new Torneo("Copa Otonio");
         GestorTorneo gestorTorneo = new GestorTorneo(torneo, new NotificadorConsola());
         ConsolaView view = new ConsolaView();
