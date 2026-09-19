@@ -1,14 +1,11 @@
 package com.torneopro.Views;
 
-
 import com.torneopro.models.Equipo;
 import com.torneopro.models.Partido;
 import com.torneopro.Structures.NodoBracket;
 import java.util.List;
 import java.util.Scanner;
 
-/** Capa de Vista: todo lo que imprime en pantalla o lee del usuario vive aqui.
- *  No contiene logica de negocio, solo presentacion. */
 public class ConsolaView {
 
     private final Scanner scanner = new Scanner(System.in);
@@ -16,10 +13,11 @@ public class ConsolaView {
     public void mostrarMenu() {
         System.out.println("\n=== TorneoPro ===");
         System.out.println("1. Inscribir equipo");
-        System.out.println("2. Ver bracket");
-        System.out.println("3. Registrar resultado de un partido");
-        System.out.println("4. Ver historial");
-        System.out.println("5. Salir");
+        System.out.println("2. Generar bracket");
+        System.out.println("3. Ver bracket completo");
+        System.out.println("4. Registrar resultado de un partido");
+        System.out.println("5. Ver historial");
+        System.out.println("6. Salir");
         System.out.print("Elige una opcion: ");
     }
 
@@ -40,13 +38,38 @@ public class ConsolaView {
         System.out.println("[ERROR] " + mensaje);
     }
 
-    public void mostrarPartido(NodoBracket nodo, String etiqueta) {
-        Partido partido = nodo.getPartido();
-        if (partido == null) {
-            System.out.println(etiqueta + ": (aun no definido)");
+    /** Imprime el bracket completo de forma recursiva, indentando por nivel. */
+    public void mostrarBracketCompleto(NodoBracket nodo) {
+        mostrarNodoRecursivo(nodo, 0);
+    }
+
+    private void mostrarNodoRecursivo(NodoBracket nodo, int nivel) {
+        if (nodo == null) {
             return;
         }
-        System.out.println(etiqueta + ": " + partido);
+        String indentacion = "  ".repeat(nivel);
+        if (nodo.esHoja()) {
+            System.out.println(indentacion + "- " + nodo.getEquipoResultante().getNombre());
+        } else {
+            mostrarNodoRecursivo(nodo.getIzquierdo(), nivel + 1);
+            String texto = (nodo.getPartido() != null)
+                ? nodo.getPartido().toString()
+                : "(pendiente de definir)";
+            System.out.println(indentacion + "* " + texto);
+            mostrarNodoRecursivo(nodo.getDerecho(), nivel + 1);
+        }
+    }
+
+    /** Muestra una lista numerada de partidos que aun no tienen resultado. */
+    public void mostrarPartidosPendientes(List<NodoBracket> pendientes) {
+        if (pendientes.isEmpty()) {
+            System.out.println("No hay partidos pendientes por registrar.");
+            return;
+        }
+        System.out.println("--- Partidos pendientes ---");
+        for (int i = 0; i < pendientes.size(); i++) {
+            System.out.println((i + 1) + ". " + pendientes.get(i).getPartido());
+        }
     }
 
     public void mostrarHistorial(List<Partido> partidas) {

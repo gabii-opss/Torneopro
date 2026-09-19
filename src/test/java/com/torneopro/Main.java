@@ -22,7 +22,7 @@ public class Main {
         ConexionBD.inicializarEsquema();
 
         EquipoRepositorio equipoRepo = new EquipoRepositorio();
-        Equipo equipoPrueba = crearEquipoDemo("Equipo Persistido");
+        Equipo equipoPrueba = crearEquipoDemo("Equipo Persistido " + System.currentTimeMillis());
         equipoRepo.guardar(equipoPrueba);
 
         System.out.println("--- Equipos guardados en la base de datos ---");
