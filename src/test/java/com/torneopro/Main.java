@@ -20,25 +20,25 @@ public class Main {
 
         // --- Sesion 7: persistencia ---
         ConexionBD.inicializarEsquema();
-
         EquipoRepositorio equipoRepo = new EquipoRepositorio();
-        Equipo equipoPrueba = crearEquipoDemo("Equipo Persistido " + System.currentTimeMillis());
-        equipoRepo.guardar(equipoPrueba);
-
-        System.out.println("--- Equipos guardados en la base de datos ---");
-        equipoRepo.listarTodos().forEach(e ->
-            System.out.println(e + " -> jugadores: " + e.getJugadores())
-        );
+        List<Equipo> equiposGuardados = equipoRepo.listarTodos();
 
         // --- Sesion 4: flujo MVC interactivo ---
         Torneo torneo = new Torneo("Copa Otonio");
+
+        // Carga en el torneo los equipos que ya existian en la base de datos
+        for (Equipo equipo : equiposGuardados) {
+            torneo.inscribirEquipo(equipo);
+        }
+
         GestorTorneo gestorTorneo = new GestorTorneo(torneo, new NotificadorConsola());
         ConsolaView view = new ConsolaView();
-        TorneoController controller = new TorneoController(view, torneo, gestorTorneo);
+        TorneoController controller = new TorneoController(view, torneo, gestorTorneo, equipoRepo);
 
+        view.mostrarMensaje("Equipos cargados desde la base de datos: " + equiposGuardados.size());
         controller.iniciar();
 
-        // --- Sesion 6: concurrencia ---
+        // --- Sesion 6: concurrencia (demo aparte, con equipos de prueba) ---
         Equipo halconesDemo = crearEquipoDemo("Halcones Demo");
         Equipo tigresDemo = crearEquipoDemo("Tigres Demo");
 
@@ -49,7 +49,7 @@ public class Main {
         System.out.println("Iniciando simulacion en vivo (no bloquea el hilo principal)...");
         CompletableFuture<Void> simulacion = simulador.simular(partidoEnVivo, new NotificadorConsola());
         System.out.println("Esta linea se imprime YA, mientras el marcador sigue actualizandose en paralelo.");
-        simulacion.join(); // esperamos aqui solo para que el programa no termine antes
+        simulacion.join();
 
         GestorNotificaciones gestorNotif = new GestorNotificaciones(new NotificadorConsola());
         gestorNotif.notificarResultadoATodos(

@@ -3,13 +3,14 @@ package com.torneopro.Controllers;
 import com.torneopro.Exceptions.TorneoProException;
 import com.torneopro.models.Equipo;
 import com.torneopro.models.Jugador;
+import com.torneopro.models.Partido;
 import com.torneopro.models.Torneo;
+import com.torneopro.Persistence.EquipoRepositorio;
 import com.torneopro.Services.GestorTorneo;
 import com.torneopro.Structures.Bracket;
 import com.torneopro.Structures.HistorialPartido;
 import com.torneopro.Structures.NodoBracket;
 import com.torneopro.Views.ConsolaView;
-import com.torneopro.models.Partido;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +19,16 @@ public class TorneoController {
     private final ConsolaView view;
     private final Torneo torneo;
     private final GestorTorneo gestorTorneo;
+    private final EquipoRepositorio equipoRepositorio;
     private final HistorialPartido historial = new HistorialPartido();
     private Bracket bracket;
 
-    public TorneoController(ConsolaView view, Torneo torneo, GestorTorneo gestorTorneo) {
+    public TorneoController(ConsolaView view, Torneo torneo, GestorTorneo gestorTorneo,
+                             EquipoRepositorio equipoRepositorio) {
         this.view = view;
         this.torneo = torneo;
         this.gestorTorneo = gestorTorneo;
+        this.equipoRepositorio = equipoRepositorio;
     }
 
     public void iniciar() {
@@ -49,7 +53,8 @@ public class TorneoController {
             case 3 -> verBracketCompleto();
             case 4 -> registrarResultadoDesdeConsola();
             case 5 -> view.mostrarHistorial(historial.comoLista());
-            case 6 -> { return false; }
+            case 6 -> view.mostrarEquiposInscritos(torneo.getEquipos());
+            case 7 -> { return false; }
             default -> view.mostrarMensaje("Opcion no valida.");
         }
         return true;
@@ -63,8 +68,18 @@ public class TorneoController {
             String rol = view.leerTexto("Rol jugador " + i);
             equipo.agregarJugador(new Jugador(gamertag, gamertag, rol));
         }
+
         gestorTorneo.inscribirEquipo(equipo);
-        view.mostrarMensaje("Equipo inscrito correctamente.");
+
+        try {
+            equipoRepositorio.guardar(equipo);
+            view.mostrarMensaje("Equipo inscrito y guardado en la base de datos.");
+        } catch (RuntimeException e) {
+            view.mostrarMensaje(
+                "Equipo inscrito en esta sesion, pero NO se pudo guardar en la base de datos "
+                + "(es posible que ya exista un equipo con ese nombre de una ejecucion anterior)."
+            );
+        }
     }
 
     private void generarBracket() {
@@ -120,7 +135,6 @@ public class TorneoController {
         view.mostrarMensaje("Resultado registrado. Ganador: " + ganador.getNombre());
     }
 
-    /** Recorre el bracket buscando nodos con un partido activo (no finalizado). */
     private List<NodoBracket> obtenerPartidosPendientes(NodoBracket nodo, List<NodoBracket> acumulado) {
         if (nodo == null || nodo.esHoja()) {
             return acumulado;

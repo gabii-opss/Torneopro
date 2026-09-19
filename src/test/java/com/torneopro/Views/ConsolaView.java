@@ -1,6 +1,7 @@
 package com.torneopro.Views;
 
 import com.torneopro.models.Equipo;
+import com.torneopro.models.Jugador;
 import com.torneopro.models.Partido;
 import com.torneopro.Structures.NodoBracket;
 import java.util.List;
@@ -17,7 +18,8 @@ public class ConsolaView {
         System.out.println("3. Ver bracket completo");
         System.out.println("4. Registrar resultado de un partido");
         System.out.println("5. Ver historial");
-        System.out.println("6. Salir");
+        System.out.println("6. Ver equipos inscritos");
+        System.out.println("7. Salir");
         System.out.print("Elige una opcion: ");
     }
 
@@ -38,7 +40,6 @@ public class ConsolaView {
         System.out.println("[ERROR] " + mensaje);
     }
 
-    /** Imprime el bracket completo de forma recursiva, indentando por nivel. */
     public void mostrarBracketCompleto(NodoBracket nodo) {
         mostrarNodoRecursivo(nodo, 0);
     }
@@ -52,15 +53,25 @@ public class ConsolaView {
             System.out.println(indentacion + "- " + nodo.getEquipoResultante().getNombre());
         } else {
             mostrarNodoRecursivo(nodo.getIzquierdo(), nivel + 1);
-            String texto = (nodo.getPartido() != null)
-                ? nodo.getPartido().toString()
-                : "(pendiente de definir)";
-            System.out.println(indentacion + "* " + texto);
+            System.out.println(indentacion + "* " + describirPartido(nodo.getPartido()));
             mostrarNodoRecursivo(nodo.getDerecho(), nivel + 1);
         }
     }
 
-    /** Muestra una lista numerada de partidos que aun no tienen resultado. */
+    /** Arma una linea legible de un partido: quienes juegan y si ya tiene ganador o esta pendiente. */
+    private String describirPartido(Partido partido) {
+        if (partido == null) {
+            return "(pendiente de definir)";
+        }
+        String nombreB = (partido.getEquipoB() != null) ? partido.getEquipoB().getNombre() : "BYE";
+        String enfrentamiento = partido.getEquipoA().getNombre() + " vs " + nombreB;
+
+        if (partido.getGanador() != null) {
+            return enfrentamiento + " -> Ganador: " + partido.getGanador().getNombre();
+        }
+        return enfrentamiento + " -> PENDIENTE";
+    }
+
     public void mostrarPartidosPendientes(List<NodoBracket> pendientes) {
         if (pendientes.isEmpty()) {
             System.out.println("No hay partidos pendientes por registrar.");
@@ -68,13 +79,15 @@ public class ConsolaView {
         }
         System.out.println("--- Partidos pendientes ---");
         for (int i = 0; i < pendientes.size(); i++) {
-            System.out.println((i + 1) + ". " + pendientes.get(i).getPartido());
+            System.out.println((i + 1) + ". " + describirPartido(pendientes.get(i).getPartido()));
         }
     }
 
     public void mostrarHistorial(List<Partido> partidas) {
         System.out.println("--- Historial (" + partidas.size() + " partidas) ---");
-        partidas.forEach(p -> System.out.println("  " + p));
+        for (Partido partido : partidas) {
+            System.out.println("  " + describirPartido(partido));
+        }
     }
 
     public void mostrarCampeon(Equipo campeon) {
@@ -82,6 +95,22 @@ public class ConsolaView {
             System.out.println("CAMPEON: " + campeon.getNombre());
         } else {
             System.out.println("El torneo aun no tiene campeon.");
+        }
+    }
+
+    public void mostrarEquiposInscritos(List<Equipo> equipos) {
+        if (equipos.isEmpty()) {
+            System.out.println("Aun no hay equipos inscritos.");
+            return;
+        }
+        System.out.println("--- Equipos inscritos (" + equipos.size() + ") ---");
+        for (Equipo equipo : equipos) {
+            System.out.println("Equipo: " + equipo.getNombre()
+                + " | Victorias: " + equipo.getVictorias()
+                + " | Derrotas: " + equipo.getDerrotas());
+            for (Jugador jugador : equipo.getJugadores()) {
+                System.out.println("   - " + jugador.getGamertag() + " (" + jugador.getRol() + ")");
+            }
         }
     }
 }
