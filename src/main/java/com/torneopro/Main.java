@@ -1,0 +1,93 @@
+package com.torneopro;
+
+import com.torneopro.Controllers.TorneoController;
+import com.torneopro.Controllers.TorneoWebController;
+import com.torneopro.models.Equipo;
+import com.torneopro.models.Jugador;
+import com.torneopro.models.Partido;
+import com.torneopro.models.Torneo;
+import com.torneopro.Persistence.ConexionBD;
+import com.torneopro.Persistence.EquipoRepositorio;
+import com.torneopro.Services.GestorNotificaciones;
+import com.torneopro.Services.GestorTorneo;
+import com.torneopro.Services.NotificadorConsola;
+import com.torneopro.Services.SimuladorMarcador;
+import com.torneopro.Views.ConsolaView;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+public class Main {
+
+    /** Por defecto arranca el servidor web. Con el argumento "--consola" corre el menu original. */
+    public static void main(String[] args) {
+        if (args.length > 0 && args[0].equals("--consola")) {
+            ejecutarConsola();
+        } else {
+            iniciarWeb();
+        }
+    }
+
+    private static void iniciarWeb() {
+        ConexionBD.inicializarEsquema();
+        EquipoRepositorio equipoRepo = new EquipoRepositorio();
+
+        Torneo torneo = new Torneo("Copa Otonio");
+        for (Equipo equipo : equipoRepo.listarTodos()) {
+            torneo.inscribirEquipo(equipo);
+        }
+
+        GestorTorneo gestorTorneo = new GestorTorneo(torneo, new NotificadorConsola());
+        TorneoWebController web = new TorneoWebController(torneo, gestorTorneo, equipoRepo);
+        web.iniciar(8080);
+    }
+
+    private static void ejecutarConsola() {
+
+        // --- Sesion 7: persistencia ---
+        ConexionBD.inicializarEsquema();
+        EquipoRepositorio equipoRepo = new EquipoRepositorio();
+        List<Equipo> equiposGuardados = equipoRepo.listarTodos();
+
+        // --- Sesion 4: flujo MVC interactivo ---
+        Torneo torneo = new Torneo("Copa Otonio");
+
+        // Carga en el torneo los equipos que ya existian en la base de datos
+        for (Equipo equipo : equiposGuardados) {
+            torneo.inscribirEquipo(equipo);
+        }
+
+        GestorTorneo gestorTorneo = new GestorTorneo(torneo, new NotificadorConsola());
+        ConsolaView view = new ConsolaView();
+        TorneoController controller = new TorneoController(view, torneo, gestorTorneo, equipoRepo);
+
+        view.mostrarMensaje("Equipos cargados desde la base de datos: " + equiposGuardados.size());
+        controller.iniciar();
+
+        // --- Sesion 6: concurrencia (demo aparte, con equipos de prueba) ---
+        Equipo halconesDemo = crearEquipoDemo("Halcones Demo");
+        Equipo tigresDemo = crearEquipoDemo("Tigres Demo");
+
+        SimuladorMarcador simulador = new SimuladorMarcador();
+        Partido partidoEnVivo = new Partido(halconesDemo, tigresDemo);
+        partidoEnVivo.iniciar();
+
+        System.out.println("Iniciando simulacion en vivo (no bloquea el hilo principal)...");
+        CompletableFuture<Void> simulacion = simulador.simular(partidoEnVivo, new NotificadorConsola());
+        System.out.println("Esta linea se imprime YA, mientras el marcador sigue actualizandose en paralelo.");
+        simulacion.join();
+
+        GestorNotificaciones gestorNotif = new GestorNotificaciones(new NotificadorConsola());
+        gestorNotif.notificarResultadoATodos(
+            List.of(halconesDemo, tigresDemo),
+            "El torneo ha finalizado, gracias por participar."
+        );
+    }
+
+    private static Equipo crearEquipoDemo(String nombre) {
+        Equipo equipo = new Equipo(nombre);
+        for (int i = 1; i <= Equipo.MAX_JUGADORES; i++) {
+            equipo.agregarJugador(new Jugador("Jugador" + i, nombre.replace(" ", "") + i, "Flex"));
+        }
+        return equipo;
+    }
+}

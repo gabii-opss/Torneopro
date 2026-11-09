@@ -1,6 +1,7 @@
 package com.torneopro;
 
 import com.torneopro.Controllers.TorneoController;
+import com.torneopro.Controllers.TorneoWebController;
 import com.torneopro.models.Equipo;
 import com.torneopro.models.Jugador;
 import com.torneopro.models.Partido;
@@ -16,7 +17,31 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Main {
+
+    /** Por defecto arranca el servidor web. Con el argumento "--consola" corre el menu original. */
     public static void main(String[] args) {
+        if (args.length > 0 && args[0].equals("--consola")) {
+            ejecutarConsola();
+        } else {
+            iniciarWeb();
+        }
+    }
+
+    private static void iniciarWeb() {
+        ConexionBD.inicializarEsquema();
+        EquipoRepositorio equipoRepo = new EquipoRepositorio();
+
+        Torneo torneo = new Torneo("Copa Otonio");
+        for (Equipo equipo : equipoRepo.listarTodos()) {
+            torneo.inscribirEquipo(equipo);
+        }
+
+        GestorTorneo gestorTorneo = new GestorTorneo(torneo, new NotificadorConsola());
+        TorneoWebController web = new TorneoWebController(torneo, gestorTorneo, equipoRepo);
+        web.iniciar(8080);
+    }
+
+    private static void ejecutarConsola() {
 
         // --- Sesion 7: persistencia ---
         ConexionBD.inicializarEsquema();

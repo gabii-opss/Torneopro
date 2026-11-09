@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TorneoPro: gestión de torneos de esports con equipos, bracket e historial de partidos.">
+  <title>TorneoPro | Torneos de esports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ENCABEZADO Y NAVEGACIÓN -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="#inicio" class="logo" aria-label="TorneoPro, ir al inicio">
+        <span class="logo__mark">TP</span>
+        <span class="logo__text">Torneo<strong>Pro</strong></span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="nav" id="nav" aria-label="Navegación principal">
+        <a href="#inicio" class="nav__link">Inicio</a>
+        <a href="#equipos" class="nav__link">Equipos</a>
+        <a href="#bracket" class="nav__link">Bracket</a>
+        <a href="#historial" class="nav__link">Historial</a>
+        <a href="#inscribir" class="nav__link nav__link--cta">Inscribir equipo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- PANTALLA PRINCIPAL -->
+    <section class="hero" id="inicio">
+      <div class="container hero__inner">
+        <div class="hero__text">
+          <p class="eyebrow">Plataforma de torneos de esports</p>
+          <h1>Inscribe. Compite.<br><span>Sube en el bracket.</span></h1>
+          <p class="hero__lead">
+            TorneoPro organiza tu competencia de principio a fin: inscribe equipos
+            de cinco jugadores, genera el bracket de eliminación, registra los
+            resultados y consulta el historial de cada partido.
+          </p>
+          <div class="hero__actions">
+            <a href="#inscribir" class="btn btn--primary">Inscribir un equipo</a>
+            <a href="#bracket" class="btn btn--ghost">Ver el bracket</a>
+          </div>
+        </div>
+
+        <aside class="hero__card" aria-label="Próximo enfrentamiento">
+          <p class="hero__card-label" id="heroLabel">Próximo enfrentamiento</p>
+          <div class="match">
+            <div class="match__team">
+              <span class="badge badge--a" id="heroBadgeA">?</span>
+              <span id="heroA">Por definir</span>
+            </div>
+            <span class="match__vs">VS</span>
+            <div class="match__team">
+              <span class="badge badge--b" id="heroBadgeB">?</span>
+              <span id="heroB">Por definir</span>
+            </div>
+          </div>
+          <p class="hero__card-meta" id="heroMeta">Aún no hay partidos pendientes</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- INDICADORES -->
+    <section class="stats" aria-label="Resumen del torneo">
+      <div class="container stats__grid">
+        <div class="stat"><span class="stat__num" id="statEquipos" data-count="0">0</span><span class="stat__label">Equipos inscritos</span></div>
+        <div class="stat"><span class="stat__num" id="statJugadores" data-count="0">0</span><span class="stat__label">Jugadores</span></div>
+        <div class="stat"><span class="stat__num" id="statPartidos" data-count="0">0</span><span class="stat__label">Partidos en el bracket</span></div>
+        <div class="stat"><span class="stat__num" id="statJugados" data-count="0">0</span><span class="stat__label">Partidos jugados</span></div>
+      </div>
+    </section>
+
+    <!-- EQUIPOS -->
+    <section class="section" id="equipos">
+      <div class="container">
+        <header class="section__head">
+          <h2>Equipos inscritos</h2>
+          <p>Cada equipo debe tener exactamente 5 jugadores para poder inscribirse.</p>
+        </header>
+
+        <div class="teams" id="teams">
+          <button class="team team--add" type="button" id="addTeamBtn">
+            <span class="team__plus">+</span>
+            <span>Inscribir equipo</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BRACKET -->
+    <section class="section section--alt" id="bracket">
+      <div class="container">
+        <header class="section__head">
+          <h2>Bracket del torneo</h2>
+          <p>Eliminación directa: el ganador de cada partido avanza a la siguiente ronda. Para registrar un resultado, haz clic en el equipo ganador.</p>
+          <button type="button" class="btn btn--ghost" id="genBracketBtn">Generar bracket</button>
+        </header>
+
+        <div class="bracket-wrap">
+          <div class="bracket" id="bracketBox" aria-label="Bracket de eliminación directa">
+            <p class="empty">Todavía no se ha generado el bracket.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="section" id="historial">
+      <div class="container">
+        <header class="section__head">
+          <h2>Historial de partidos</h2>
+          <p>Los resultados más recientes aparecen primero.</p>
+        </header>
+
+        <div class="filters" role="group" aria-label="Filtrar historial">
+          <button class="chip is-active" data-filter="all" type="button">Todos</button>
+          <button class="chip" data-filter="cuartos" type="button">Cuartos</button>
+          <button class="chip" data-filter="semis" type="button">Semifinales</button>
+          <button class="chip" data-filter="final" type="button">Final</button>
+        </div>
+
+        <ul class="history" id="history">
+          <li class="empty">Todavía no hay partidos jugados.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- INSCRIPCIÓN -->
+    <section class="cta" id="inscribir">
+      <div class="container cta__inner">
+        <h2>Inscribe a tu equipo</h2>
+        <p>Cada equipo necesita exactamente 5 jugadores, con gamertag y rol.</p>
+
+        <form class="form" id="teamForm" novalidate>
+          <div class="form__row">
+            <label for="teamName">Nombre del equipo</label>
+            <input type="text" id="teamName" name="teamName" placeholder="Ej: Nova Five" required>
+          </div>
+
+          <fieldset class="form__players">
+            <legend>Jugadores (5)</legend>
+            <div class="player-row"><input type="text" placeholder="Gamertag 1" aria-label="Gamertag del jugador 1"><input type="text" placeholder="Rol" aria-label="Rol del jugador 1"></div>
+            <div class="player-row"><input type="text" placeholder="Gamertag 2" aria-label="Gamertag del jugador 2"><input type="text" placeholder="Rol" aria-label="Rol del jugador 2"></div>
+            <div class="player-row"><input type="text" placeholder="Gamertag 3" aria-label="Gamertag del jugador 3"><input type="text" placeholder="Rol" aria-label="Rol del jugador 3"></div>
+            <div class="player-row"><input type="text" placeholder="Gamertag 4" aria-label="Gamertag del jugador 4"><input type="text" placeholder="Rol" aria-label="Rol del jugador 4"></div>
+            <div class="player-row"><input type="text" placeholder="Gamertag 5" aria-label="Gamertag del jugador 5"><input type="text" placeholder="Rol" aria-label="Rol del jugador 5"></div>
+          </fieldset>
+
+          <button type="submit" class="btn btn--primary">Inscribir equipo</button>
+        </form>
+        <p class="cta__msg" id="formMsg" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p><strong>TorneoPro</strong> · Proyecto académico</p>
+      <p>© 2026</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
