@@ -2,35 +2,78 @@
 
 Plataforma para gestionar torneos de esports: inscripción de equipos de 5 jugadores, bracket de eliminación directa, registro de resultados e historial de partidos.
 
-## Estado del proyecto
+## Características
 
-Esta entrega corresponde al primer acercamiento al Front-End: una interfaz estática con datos de ejemplo. Todavía no está conectada al resto del sistema.
+- Inscripción de equipos con exactamente 5 jugadores (gamertag y rol).
+- Generación de bracket de eliminación directa (árbol binario).
+- Registro del ganador de cada partido, que avanza a la siguiente ronda.
+- Historial de partidos en orden cronológico (lista enlazada).
+- Persistencia de equipos y jugadores en SQLite con JDBC.
+- Interfaz web conectada al backend, además del menú de consola original.
+
+## Tecnologías
+
+- Java 17 y Maven
+- Javalin (servidor web) y Jackson (JSON)
+- SQLite con JDBC
+- JUnit 5 para las pruebas
+- HTML, CSS y JavaScript para el frontend
 
 ## Estructura
 
 ```
-Torneopro/
-├── README.md
-└── frontend/
-    ├── index.html
-    ├── css/
-    │   └── styles.css
-    └── js/
-        └── main.js
+src/
+├── main/
+│   ├── java/com/torneopro/
+│   │   ├── Controllers/   TorneoController (consola) y TorneoWebController (web)
+│   │   ├── Exceptions/    Excepciones propias del torneo
+│   │   ├── Persistence/   Conexión y repositorio de SQLite
+│   │   ├── Services/      Gestor del torneo y notificaciones
+│   │   ├── Structures/    Bracket, historial y nodos
+│   │   ├── Views/         Vista de consola
+│   │   ├── models/        Equipo, Jugador, Partido y Torneo
+│   │   └── Main.java
+│   └── resources/static/  Frontend (index.html, css/, js/)
+└── test/                  Pruebas unitarias
 ```
 
-## Cómo verlo
+## Cómo ejecutarlo
 
-Abre `frontend/index.html` en el navegador.
+Requisitos: Java 17 o superior y Maven.
 
-## Pantallas
+Versión web:
 
-- **Inicio:** presentación del proyecto y próximo enfrentamiento.
-- **Equipos:** equipos inscritos con sus jugadores (gamertag y rol).
-- **Bracket:** cuartos, semifinales y final.
-- **Historial:** resultados de los partidos, con filtro por ronda.
-- **Inscribir equipo:** formulario con nombre del equipo y 5 jugadores.
+```
+mvn compile exec:java
+```
 
-## Tecnologías
+Abre http://localhost:8080 en el navegador. La base de datos `torneopro.db` se crea sola la primera vez.
 
-HTML5, CSS3 y JavaScript.
+Versión de consola:
+
+```
+mvn compile exec:java -Dexec.args="--consola"
+```
+
+Pruebas:
+
+```
+mvn test
+```
+```
+
+## Uso de la interfaz
+
+1. Inscribe al menos 2 equipos con el formulario.
+2. Pulsa **Generar bracket**.
+3. Haz clic sobre el equipo ganador de cada partido para registrar el resultado.
+4. Consulta el historial, que puedes filtrar por ronda.
+
+## Notas
+
+- El bracket y el historial viven en memoria y se reinician al reiniciar el servidor. Los equipos sí se guardan en la base de datos.
+- La interfaz no guarda marcadores, solo quién ganó cada partido.
+```
+#Integrantes 
+Gabriela Puentes
+Nicolas Solano
