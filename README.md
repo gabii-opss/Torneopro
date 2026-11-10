@@ -49,11 +49,8 @@ mvn compile exec:java
 
 Abre http://localhost:8080 en el navegador. La base de datos `torneopro.db` se crea sola la primera vez.
 
-Versión de consola:
 
-```
-mvn compile exec:java -Dexec.args="--consola"
-```
+
 
 Pruebas:
 
