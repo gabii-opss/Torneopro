@@ -172,6 +172,36 @@
     </div>
   </footer>
 
+  <!-- ASISTENTE IA -->
+  <button class="chat-fab" id="chatFab" type="button" aria-controls="chatPanel" aria-expanded="false">
+    <span class="chat-fab__icon">AI</span>
+    <span>Asistente</span>
+  </button>
+
+  <aside class="chat" id="chatPanel" aria-label="Asistente del torneo" hidden>
+    <header class="chat__head">
+      <div>
+        <strong>Asistente TorneoPro</strong>
+        <span>Pregunta sobre equipos, bracket y partidos</span>
+      </div>
+      <button class="chat__close" id="chatClose" type="button" aria-label="Cerrar asistente">&times;</button>
+    </header>
+
+    <div class="chat__msgs" id="chatMsgs" aria-live="polite"></div>
+
+    <div class="chat__sugerencias" id="chatSug">
+      <button type="button">¿Quién juega el próximo partido?</button>
+      <button type="button">¿Qué equipo es el favorito?</button>
+      <button type="button">Explícame cómo funciona el bracket</button>
+    </div>
+
+    <form class="chat__form" id="chatForm">
+      <input type="text" id="chatInput" maxlength="500" placeholder="Escribe tu pregunta..." autocomplete="off" aria-label="Pregunta para el asistente">
+      <button type="submit" class="btn btn--primary" id="chatSend">Enviar</button>
+    </form>
+  </aside>
+
   <script src="js/main.js"></script>
+  <script src="js/chat.js"></script>
 </body>
 </html>

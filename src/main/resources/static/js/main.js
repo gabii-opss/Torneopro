@@ -258,7 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---- Próximo enfrentamiento (tarjeta de inicio) ----
   function pintarProximo(pendientes) {
-    const label = document.getElementById("heroLabel");
     const meta = document.getElementById("heroMeta");
     const nombreA = document.getElementById("heroA");
     const nombreB = document.getElementById("heroB");
@@ -266,7 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const badgeB = document.getElementById("heroBadgeB");
 
     if (pendientes.length === 0) {
-      label.textContent = "Próximo enfrentamiento";
       nombreA.textContent = "Por definir";
       nombreB.textContent = "Por definir";
       badgeA.textContent = "?";
@@ -275,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const p = pendientes[0];
-    label.textContent = "Próximo enfrentamiento";
     nombreA.textContent = p.equipoA;
     nombreB.textContent = p.equipoB;
     badgeA.textContent = p.equipoA.slice(0, 2).toUpperCase();
