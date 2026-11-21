@@ -285,6 +285,7 @@ h1, h2, h3 {
 .slot--click:hover { background: rgba(124, 92, 255, 0.2); color: #fff; }
 button.btn { background: transparent; font-family: inherit; cursor: pointer; }
 button.btn--primary { background: linear-gradient(135deg, var(--violet), var(--violet-dark)); }
+
 /* Que los nombres largos no rompan las tarjetas */
 .teams .team { min-width: 0; }
 .team > div { min-width: 0; flex: 1; }
@@ -292,3 +293,68 @@ button.btn--primary { background: linear-gradient(135deg, var(--violet), var(--v
 .players li { min-width: 0; }
 .players b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .players span { flex-shrink: 0; }
+
+/* ---------- Asistente de IA ---------- */
+.chat-fab {
+  position: fixed; right: 1.4rem; bottom: 1.4rem; z-index: 60;
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.7rem 1.2rem 0.7rem 0.8rem; border-radius: 999px; border: 0; cursor: pointer;
+  background: linear-gradient(135deg, var(--violet), var(--violet-dark)); color: #fff;
+  font-family: var(--font-body); font-weight: 600; font-size: 0.95rem;
+  box-shadow: 0 0 24px rgba(124, 92, 255, 0.55);
+  transition: transform 0.15s ease;
+}
+.chat-fab:hover { transform: translateY(-2px); }
+.chat-fab__icon {
+  display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--cyan); color: #0d0f1a; font-family: var(--font-title); font-weight: 700; font-size: 0.95rem;
+}
+
+.chat {
+  position: fixed; right: 1.4rem; bottom: 5.4rem; z-index: 60;
+  width: 370px; max-width: calc(100vw - 2rem); height: 520px; max-height: calc(100vh - 7rem);
+  display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.chat[hidden] { display: none; }
+
+.chat__head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+  padding: 0.9rem 1.1rem; background: var(--panel-2); border-bottom: 1px solid var(--line);
+}
+.chat__head strong { display: block; font-family: var(--font-title); font-size: 1.15rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.chat__head span { color: var(--muted); font-size: 0.8rem; }
+.chat__close { background: none; border: 0; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.chat__close:hover { color: #fff; }
+
+.chat__msgs { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.chat__msg { max-width: 85%; padding: 0.6rem 0.85rem; border-radius: 14px; font-size: 0.92rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat__msg--user { align-self: flex-end; background: linear-gradient(135deg, var(--violet), var(--violet-dark)); color: #fff; border-bottom-right-radius: 4px; }
+.chat__msg--bot { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.chat__msg--espera { color: var(--muted); font-style: italic; }
+.chat__msg--error { border-color: var(--pink); color: var(--pink); }
+
+.chat__sugerencias { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 1rem 0.8rem; }
+.chat__sugerencias[hidden] { display: none; }
+.chat__sugerencias button {
+  padding: 0.35rem 0.8rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--cyan);
+  font-family: var(--font-body); font-size: 0.8rem;
+}
+.chat__sugerencias button:hover { border-color: var(--cyan); background: rgba(45, 226, 230, 0.08); }
+
+.chat__form { display: flex; gap: 0.5rem; padding: 0.8rem; border-top: 1px solid var(--line); }
+.chat__form input {
+  flex: 1; min-width: 0; padding: 0.6rem 0.8rem; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  font-family: var(--font-body); font-size: 0.92rem;
+}
+.chat__form input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(45, 226, 230, 0.2); }
+.chat__form .btn { padding: 0.6rem 1rem; }
+.chat__form .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+@media (max-width: 720px) {
+  .chat { right: 0.6rem; bottom: 4.8rem; }
+  .chat-fab { right: 0.8rem; bottom: 0.8rem; }
+}

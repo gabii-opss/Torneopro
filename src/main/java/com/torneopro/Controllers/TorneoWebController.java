@@ -1,11 +1,13 @@
 package com.torneopro.Controllers;
 
+import com.torneopro.Exceptions.AsistenteIAException;
 import com.torneopro.Exceptions.TorneoProException;
 import com.torneopro.models.Equipo;
 import com.torneopro.models.Jugador;
 import com.torneopro.models.Partido;
 import com.torneopro.models.Torneo;
 import com.torneopro.Persistence.EquipoRepositorio;
+import com.torneopro.Services.AsistenteIA;
 import com.torneopro.Services.GestorTorneo;
 import com.torneopro.Structures.Bracket;
 import com.torneopro.Structures.HistorialPartido;
@@ -30,10 +32,12 @@ public class TorneoWebController {
     public record JugadorDTO(String gamertag, String rol) { }
     public record EquipoDTO(String nombre, List<JugadorDTO> jugadores) { }
     public record ResultadoDTO(int partido, String ganador) { }
+    public record ChatDTO(String mensaje, List<AsistenteIA.Mensaje> historial) { }
 
     private final Torneo torneo;
     private final GestorTorneo gestorTorneo;
     private final EquipoRepositorio equipoRepositorio;
+    private final AsistenteIA asistente = new AsistenteIA();
     private final HistorialPartido historial = new HistorialPartido();
     private final Map<Partido, String> rondas = new IdentityHashMap<>();
     private Bracket bracket;
@@ -57,6 +61,7 @@ public class TorneoWebController {
         app.get("/api/partidos/pendientes", this::partidosPendientes);
         app.post("/api/resultados", this::registrarResultado);
         app.get("/api/historial", this::verHistorial);
+        app.post("/api/chat", this::chat);
 
         // Errores de negocio (equipo incompleto, torneo iniciado, ...) -> 400 con mensaje
         app.exception(TorneoProException.class, (e, ctx) ->
@@ -197,6 +202,84 @@ public class TorneoWebController {
             lista.add(partidoAMapa(p));
         }
         ctx.json(lista);
+    }
+
+    // ---- Asistente de IA ----
+
+    /** La llamada a la IA se hace fuera del synchronized para no bloquear el resto de la API. */
+    private void chat(Context ctx) {
+        ChatDTO dto = ctx.bodyAsClass(ChatDTO.class);
+        if (dto.mensaje() == null || dto.mensaje().isBlank()) {
+            ctx.status(400).json(Map.of("error", "Escribe una pregunta."));
+            return;
+        }
+        if (dto.mensaje().length() > 500) {
+            ctx.status(400).json(Map.of("error", "La pregunta es muy larga (maximo 500 caracteres)."));
+            return;
+        }
+        if (!asistente.disponible()) {
+            ctx.status(503).json(Map.of("error",
+                "El asistente no esta configurado: falta la variable de entorno GEMINI_API_KEY."));
+            return;
+        }
+
+        try {
+            String respuesta = asistente.preguntar(construirContexto(), dto.historial(), dto.mensaje().trim());
+            ctx.json(Map.of("respuesta", respuesta));
+        } catch (AsistenteIAException e) {
+            ctx.status(502).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** Resume el estado actual del torneo en texto para que la IA responda con datos reales. */
+    private synchronized String construirContexto() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Torneo: ").append(torneo.getNombre()).append("\n");
+        sb.append("Equipos inscritos: ").append(torneo.getEquipos().size()).append("\n");
+        for (Equipo e : torneo.getEquipos()) {
+            List<String> jugadores = new ArrayList<>();
+            for (Jugador j : e.getJugadores()) {
+                jugadores.add(j.getGamertag() + " (" + j.getRol() + ")");
+            }
+            sb.append("- ").append(e.getNombre())
+              .append(" | victorias: ").append(e.getVictorias())
+              .append(", derrotas: ").append(e.getDerrotas())
+              .append(" | jugadores: ").append(String.join(", ", jugadores)).append("\n");
+        }
+
+        if (bracket == null) {
+            sb.append("Bracket: todavia no se ha generado.\n");
+        } else {
+            sb.append("Bracket: generado.\n");
+            List<NodoBracket> pendientes = obtenerPartidosPendientes(bracket.getRaiz(), new ArrayList<>());
+            if (pendientes.isEmpty()) {
+                sb.append("Partidos pendientes: ninguno.\n");
+            } else {
+                sb.append("Partidos pendientes:\n");
+                for (NodoBracket n : pendientes) {
+                    Partido p = n.getPartido();
+                    sb.append("- ").append(nombreRonda(n)).append(": ")
+                      .append(p.getEquipoA().getNombre()).append(" vs ")
+                      .append(p.getEquipoB() != null ? p.getEquipoB().getNombre() : "BYE").append("\n");
+                }
+            }
+            Equipo campeon = bracket.getCampeon();
+            sb.append("Campeon: ").append(campeon != null ? campeon.getNombre() : "aun no definido").append("\n");
+        }
+
+        List<Partido> jugados = historial.comoLista();
+        if (jugados.isEmpty()) {
+            sb.append("Historial: todavia no se ha jugado ningun partido.\n");
+        } else {
+            sb.append("Historial de partidos jugados:\n");
+            for (Partido p : jugados) {
+                sb.append("- ").append(rondas.get(p)).append(": ")
+                  .append(p.getEquipoA().getNombre()).append(" vs ")
+                  .append(p.getEquipoB() != null ? p.getEquipoB().getNombre() : "BYE")
+                  .append(", gano ").append(p.getGanador().getNombre()).append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     // ---- Conversion a JSON (se evita serializar los objetos del dominio: NodoBracket tiene ciclos por "padre") ----
